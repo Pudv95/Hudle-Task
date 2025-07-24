@@ -3,10 +3,12 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:developer';
 import '../../domain/usecases/get_weather_by_city.dart';
 import '../../domain/usecases/get_weather_by_location.dart';
 import '../../domain/usecases/get_cached_weather.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../../core/constants/app_constants.dart';
 import 'weather_event.dart';
 import 'weather_state.dart';
 
@@ -87,7 +89,8 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
       if (weather != null) {
         emit(WeatherLoaded(weather));
       } else {
-        emit(const WeatherError('No cached weather data available.'));
+        // If no cached weather, load default city
+        add(FetchWeatherByCity(AppConstants.defaultCity));
       }
     });
   }

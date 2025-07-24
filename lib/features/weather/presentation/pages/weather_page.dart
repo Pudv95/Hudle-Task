@@ -9,9 +9,24 @@ import '../widgets/weather_display.dart';
 import '../widgets/weather_error.dart' as error_widget;
 import '../widgets/weather_loading.dart' as loading_widget;
 import '../widgets/theme_toggle_button.dart';
+import '../../../../core/constants/app_constants.dart';
 
-class WeatherPage extends StatelessWidget {
+class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
+
+  @override
+  State<WeatherPage> createState() => _WeatherPageState();
+}
+
+class _WeatherPageState extends State<WeatherPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load default city weather when the page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WeatherBloc>().add(const LoadCachedWeather());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +91,28 @@ class WeatherPage extends StatelessWidget {
             'Search for a city to get weather information',
             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
             textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Popular Cities',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: AppConstants.popularCities.take(8).map((city) {
+              return ActionChip(
+                label: Text(city),
+                onPressed: () {
+                  context.read<WeatherBloc>().add(FetchWeatherByCity(city));
+                },
+              );
+            }).toList(),
           ),
         ],
       ),

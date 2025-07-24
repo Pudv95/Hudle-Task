@@ -30,4 +30,38 @@ class AppConstants {
       'Something went wrong. Please try again.';
   static const String locationPermissionMessage =
       'Location permission is required to get weather for your current location.';
+
+  // Popular Cities for Suggestions
+  static const List<String> popularCities = [
+    'London',
+    'New York',
+    'Tokyo',
+    'Paris',
+    'Mumbai',
+    'Delhi',
+    'Bangalore',
+    'Chennai',
+    'Kolkata',
+    'Hyderabad',
+    'Pune',
+    'Ahmedabad',
+    'Jaipur',
+    'Surat',
+    'Lucknow',
+    'Kanpur',
+    'Nagpur',
+    'Indore',
+    'Thane',
+    'Bhopal',
+    'Visakhapatnam',
+    'Pimpri-Chinchwad',
+    'Patna',
+    'Vadodara',
+    'Ghaziabad',
+    'Ludhiana',
+    'Agra',
+    'Nashik',
+    'Faridabad',
+    'Meerut',
+  ];
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -46,6 +48,7 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
 
     // Check location permission
     final permission = await Permission.location.request();
+    log('permission: $permission');
     if (permission.isDenied) {
       emit(const WeatherError('Location permission is required.'));
       return;

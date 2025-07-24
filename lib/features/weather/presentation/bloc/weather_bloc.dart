@@ -9,6 +9,7 @@ import '../../domain/usecases/get_weather_by_location.dart';
 import '../../domain/usecases/get_cached_weather.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/search_history_manager.dart';
 import 'weather_event.dart';
 import 'weather_state.dart';
 
@@ -38,7 +39,10 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
 
     result.fold(
       (failure) => emit(WeatherError(failure.message)),
-      (weather) => emit(WeatherLoaded(weather)),
+      (weather) {
+        SearchHistoryManager.addToHistory(event.cityName);
+        emit(WeatherLoaded(weather));
+      },
     );
   }
 

@@ -33,10 +33,6 @@ class AppConstants {
 
   // Popular Cities for Suggestions
   static const List<String> popularCities = [
-    'London',
-    'New York',
-    'Tokyo',
-    'Paris',
     'Mumbai',
     'Delhi',
     'Bangalore',

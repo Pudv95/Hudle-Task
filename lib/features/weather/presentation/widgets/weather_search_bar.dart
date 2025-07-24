@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/weather_bloc.dart';
 import '../bloc/weather_event.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/search_history_manager.dart';
 
 class WeatherSearchBar extends StatefulWidget {
   const WeatherSearchBar({super.key});
@@ -20,7 +20,14 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
   @override
   void initState() {
     super.initState();
-    _filteredCities = AppConstants.popularCities;
+    _loadSuggestions('');
+  }
+
+  Future<void> _loadSuggestions(String query) async {
+    final suggestions = await SearchHistoryManager.getSuggestions(query);
+    setState(() {
+      _filteredCities = suggestions;
+    });
   }
 
   @override
@@ -31,19 +38,10 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
   }
 
   void _filterCities(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        _filteredCities = AppConstants.popularCities;
-        _showSuggestions = true;
-      });
-    } else {
-      setState(() {
-        _filteredCities = AppConstants.popularCities
-            .where((city) => city.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-        _showSuggestions = true;
-      });
-    }
+    _loadSuggestions(query);
+    setState(() {
+      _showSuggestions = true;
+    });
   }
 
   @override
@@ -85,7 +83,8 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                       prefixIcon: const Icon(Icons.search),
                     ),
                     onChanged: _filterCities,
-                    onTap: () {
+                    onTap: () async {
+                      await _loadSuggestions(_controller.text);
                       setState(() {
                         _showSuggestions = true;
                       });
@@ -131,21 +130,45 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                 ],
               ),
               constraints: const BoxConstraints(maxHeight: 200),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _filteredCities.length,
-                itemBuilder: (context, index) {
-                  final city = _filteredCities[index];
-                  return ListTile(
-                    leading: const Icon(Icons.location_city),
-                    title: Text(city),
-                    onTap: () {
-                      _controller.text = city;
-                      context.read<WeatherBloc>().add(FetchWeatherByCity(city));
-                      _focusNode.unfocus();
-                      setState(() {
-                        _showSuggestions = false;
-                      });
+              child: FutureBuilder<List<String>>(
+                future: SearchHistoryManager.getHistory(),
+                builder: (context, snapshot) {
+                  final recentSearches = snapshot.data ?? [];
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _filteredCities.length,
+                    itemBuilder: (context, index) {
+                      final city = _filteredCities[index];
+                      final isRecent = recentSearches.contains(city);
+                      return ListTile(
+                        leading: Icon(
+                          isRecent ? Icons.history : Icons.location_city,
+                          color: isRecent ? Colors.blue : null,
+                        ),
+                        title: Text(
+                          city,
+                          style: TextStyle(
+                            fontWeight: isRecent
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: isRecent
+                            ? const Text('Recently searched')
+                            : null,
+                        onTap: () async {
+                          _controller.text = city;
+                          context.read<WeatherBloc>().add(
+                            FetchWeatherByCity(city),
+                          );
+                          _focusNode.unfocus();
+                          setState(() {
+                            _showSuggestions = false;
+                          });
+                          // Refresh suggestions after selection
+                          await _loadSuggestions('');
+                        },
+                      );
                     },
                   );
                 },

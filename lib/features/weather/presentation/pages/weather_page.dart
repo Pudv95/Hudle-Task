@@ -105,7 +105,7 @@ class _WeatherPageState extends State<WeatherPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: AppConstants.popularCities.take(8).map((city) {
+            children: AppConstants.popularCities.take(5).map((city) {
               return ActionChip(
                 label: Text(city),
                 onPressed: () {

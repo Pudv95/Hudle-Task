@@ -73,6 +73,12 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                   child: TextField(
                     controller: _controller,
                     focusNode: _focusNode,
+                    onTapOutside: (event) {
+                      _focusNode.unfocus();
+                      setState(() {
+                        _showSuggestions = false;
+                      });
+                    },
                     decoration: InputDecoration(
                       hintText: 'Enter city name...',
                       border: InputBorder.none,

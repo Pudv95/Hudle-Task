@@ -86,12 +86,22 @@ class WeatherRepositoryImpl implements WeatherRepository {
     try {
       final weatherModel = WeatherModel(
         cityName: weather.cityName,
+        country: weather.country,
+        feelsLike: weather.feelsLike,
+        tempMin: weather.tempMin,
+        tempMax: weather.tempMax,
+        windDirection: weather.windDirection,
+        pressure: weather.pressure,
+        visibility: weather.visibility,
         temperature: weather.temperature,
         description: weather.description,
         icon: weather.icon,
         humidity: weather.humidity,
         windSpeed: weather.windSpeed,
         timestamp: weather.timestamp,
+        uvIndex: 0,
+        sunrise: weather.sunrise,
+        sunset: weather.sunset,
       );
       await localDataSource.cacheWeather(weatherModel);
       return const Right(null);

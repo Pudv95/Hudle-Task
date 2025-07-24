@@ -30,54 +30,53 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Weather App'),
-        actions: const [ThemeToggleButton()],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          context.read<WeatherBloc>().add(const RefreshWeather());
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Container(
-            height:
-                MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.top -
-                kToolbarHeight,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                const WeatherSearchBar(),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: BlocBuilder<WeatherBloc, WeatherState>(
-                    builder: (context, state) {
-                      if (state is WeatherInitial) {
-                        return _buildInitialState();
-                      } else if (state is WeatherLoading) {
-                        return const loading_widget.WeatherLoading();
-                      } else if (state is WeatherLoaded) {
-                        return WeatherDisplay(weather: state.weather)
-                            .animate()
-                            .fadeIn(duration: const Duration(milliseconds: 500))
-                            .slideY(begin: 0.3, end: 0);
-                      } else if (state is WeatherError) {
-                        return error_widget.WeatherError(
-                          message: state.message,
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+    return BlocBuilder<WeatherBloc, WeatherState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Weather App'),
+            actions: const [ThemeToggleButton()],
+          ),
+          body: RefreshIndicator(
+            onRefresh: () async {
+              context.read<WeatherBloc>().add(const RefreshWeather());
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                height:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    kToolbarHeight,
+                child: Column(
+                  children: [
+                    const WeatherSearchBar(),
+                    const SizedBox(height: 24),
+                    Expanded(child: _buildWeatherContent(state)),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  Widget _buildWeatherContent(WeatherState state) {
+    if (state is WeatherInitial) {
+      return _buildInitialState();
+    } else if (state is WeatherLoading) {
+      return const loading_widget.WeatherLoading();
+    } else if (state is WeatherLoaded) {
+      return WeatherDisplay(weather: state.weather)
+          .animate()
+          .fadeIn(duration: const Duration(milliseconds: 500))
+          .slideY(begin: 0.3, end: 0);
+    } else if (state is WeatherError) {
+      return error_widget.WeatherError(message: state.message);
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _buildInitialState() {
@@ -85,34 +84,98 @@ class _WeatherPageState extends State<WeatherPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'Search for a city to get weather information',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-            textAlign: TextAlign.center,
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.cloud,
+              size: 80,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Popular Cities',
+            'Search for a city to get weather information',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
+              fontSize: 20,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+              fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: AppConstants.popularCities.take(5).map((city) {
-              return ActionChip(
-                label: Text(city),
-                onPressed: () {
-                  context.read<WeatherBloc>().add(FetchWeatherByCity(city));
-                },
-              );
-            }).toList(),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Popular Cities',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: AppConstants.popularCities.take(6).map((city) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            context.read<WeatherBloc>().add(
+                              FetchWeatherByCity(city),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Text(
+                              city,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

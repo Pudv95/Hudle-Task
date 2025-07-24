@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:developer';
 import '../../domain/usecases/get_weather_by_city.dart';
 import '../../domain/usecases/get_weather_by_location.dart';
 import '../../domain/usecases/get_cached_weather.dart';

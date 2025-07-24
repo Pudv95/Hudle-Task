@@ -9,7 +9,9 @@ class SearchHistoryManager {
     final prefs = await SharedPreferences.getInstance();
     final history = await getHistory();
 
-    history.remove(cityName);
+    history.removeWhere(
+      (element) => element.toLowerCase() == cityName.toLowerCase(),
+    );
 
     history.insert(0, cityName.toLowerCase());
 
@@ -27,10 +29,7 @@ class SearchHistoryManager {
     if (historyJson != null) {
       try {
         final List<dynamic> historyList = jsonDecode(historyJson);
-        return historyList
-            .cast<String>()
-            .map((e) => "${e[0].toUpperCase()}${e.substring(1)}")
-            .toList();
+        return historyList.cast<String>();
       } catch (e) {
         return [];
       }
@@ -41,7 +40,6 @@ class SearchHistoryManager {
 
   static Future<List<String>> getSuggestions(String query) async {
     final history = await getHistory();
-    final allCities = [...history, ...AppConstants.popularCities];
 
     if (query.isEmpty) {
       final suggestions = <String>[];
@@ -65,6 +63,27 @@ class SearchHistoryManager {
 
       return suggestions;
     } else {
+      // For search queries, combine history and popular cities without duplicates
+      final allCities = <String>[];
+      final seen = <String>{};
+
+      // Add history first (they have priority)
+      for (final city in history) {
+        if (!seen.contains(city)) {
+          allCities.add(city);
+          seen.add(city);
+        }
+      }
+
+      // Add popular cities (excluding duplicates)
+      for (final city in AppConstants.popularCities) {
+        if (!seen.contains(city)) {
+          allCities.add(city);
+          seen.add(city);
+        }
+      }
+
+      // Filter and return
       return allCities
           .where((city) => city.toLowerCase().contains(query.toLowerCase()))
           .take(maxHistorySize)

@@ -75,9 +75,6 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                     focusNode: _focusNode,
                     onTapOutside: (event) {
                       _focusNode.unfocus();
-                      setState(() {
-                        _showSuggestions = false;
-                      });
                     },
                     decoration: InputDecoration(
                       hintText: 'Enter city name...',
@@ -100,7 +97,6 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                         context.read<WeatherBloc>().add(
                           FetchWeatherByCity(value.trim()),
                         );
-                        _controller.clear();
                         _focusNode.unfocus();
                         setState(() {
                           _showSuggestions = false;

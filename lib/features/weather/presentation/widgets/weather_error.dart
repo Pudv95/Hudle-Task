@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudle_task/features/weather/presentation/bloc/weather_bloc.dart';
+import 'package:hudle_task/features/weather/presentation/bloc/weather_event.dart';
 
 class WeatherError extends StatelessWidget {
   final String message;
@@ -41,17 +44,18 @@ class WeatherError extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red[600],
-                foregroundColor: Colors.white,
+            if (message.contains('Connection timeout'))
+              ElevatedButton.icon(
+                onPressed: () {
+                  context.read<WeatherBloc>().add(const LoadCachedWeather());
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[600],
+                  foregroundColor: Colors.white,
+                ),
               ),
-            ),
           ],
         ),
       ),
